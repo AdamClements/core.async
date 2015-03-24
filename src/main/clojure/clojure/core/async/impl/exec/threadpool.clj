@@ -8,7 +8,8 @@
 
 (ns clojure.core.async.impl.exec.threadpool
   (:require [clojure.core.async.impl.protocols :as impl]
-            [clojure.core.async.impl.concurrent :as conc])
+            [clojure.core.async.impl.concurrent :as conc]            
+            [clojure.stacktrace :refer [print-cause-trace]])
   (:import [java.util.concurrent Executors Executor]))
 
 (set! *warn-on-reflection* true)
@@ -17,8 +18,7 @@
   (Executors/newFixedThreadPool
    (-> (Runtime/getRuntime)
        (.availableProcessors)
-       (* 2)
-       (+ 42))
+       (* 2))
    (conc/counted-thread-factory "async-dispatch-%d" true)))
 
 (defn thread-pool-executor
@@ -26,4 +26,9 @@
   ([^Executor executor-svc]
      (reify impl/Executor
        (impl/exec [this r]
-         (.execute executor-svc ^Runnable r)))))
+         (.execute executor-svc ^Runnable (fn []
+                                            (try
+                                              (r)
+                                              (catch Throwable ex
+                                                (binding [*out* *err*]
+                                                  (println "Go Loop died!" (with-out-str (print-cause-trace ex))))))))))))
