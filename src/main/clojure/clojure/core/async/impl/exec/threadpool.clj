@@ -28,8 +28,4 @@
      (reify impl/Executor
        (impl/exec [this r]
          (.execute executor-svc ^Runnable (fn []
-                                            (try
-                                              (r)
-                                              (catch Throwable ex
-                                                (binding [*out* *err*]
-                                                  (println "Go Loop died!" (with-out-str (print-cause-trace ex))))))))))))
+                                            (r)))))))
