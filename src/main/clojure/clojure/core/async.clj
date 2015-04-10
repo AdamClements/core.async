@@ -377,6 +377,7 @@
   Returns a channel which will receive the result of the body when
   completed"
   [& body]
+  (require '[clojure.tools.analyzer.jvm])
   `(let [c# (chan 1)
          captured-bindings# (clojure.lang.Var/getThreadBindingFrame)]
      (dispatch/run

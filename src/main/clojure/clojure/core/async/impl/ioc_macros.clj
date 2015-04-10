@@ -9,23 +9,23 @@
 ;; by Timothy Baldridge
 ;; April 13, 2013
 
-(ns ^{:skip-wiki true}
+(ns ^{:skip-wiki true
+      :skip-aot true}
   clojure.core.async.impl.ioc-macros
   (:refer-clojure :exclude [all])
-  (:require [clojure.pprint :refer [pprint]]
-            [clojure.tools.analyzer :as an]
-            [clojure.tools.analyzer.ast :as ast]
-            [clojure.tools.analyzer.jvm :as an-jvm]
-            [clojure.core.async.impl.protocols :as impl]
+  (:require [clojure.core.async.impl.protocols :as impl]
             [clojure.core.async.impl.dispatch :as dispatch]
             [clojure.set :refer (intersection union difference)])
   (:import [java.util.concurrent.locks Lock]
            [java.util.concurrent.atomic AtomicReferenceArray]))
 
-(defn debug [x]
-  (pprint x)
-  x)
+(defmacro ignore-me-if-aotd []
+  (require '[clojure.tools.analyzer :as an]
+           '[clojure.tools.analyzer.ast :as ast]
+           '[clojure.tools.analyzer.jvm :as an-jvm])
+  nil)
 
+(ignore-me-if-aotd)
 
 (def ^:const FN-IDX 0)
 (def ^:const STATE-IDX 1)
@@ -141,11 +141,6 @@
   [path]
   (fn [plan]
     [(get-in plan path) plan]))
-
-(defn print-plan []
-  (fn [plan]
-    (pprint plan)
-    [nil plan]))
 
 (defn set-block
   "Sets the current block being written to by the functions. The next add-instruction call will append to this block"
@@ -1052,11 +1047,6 @@
                        [local {:op :local
                                :form local
                                :name local}]))))
-
-(defn pdebug [x]
-  (clojure.pprint/pprint x)
-  (println "----")
-  x)
 
 (defn state-machine [body num-user-params env user-transitions]
   (-> (an-jvm/analyze body (make-env env))
